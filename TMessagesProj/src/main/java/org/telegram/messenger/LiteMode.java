@@ -95,6 +95,18 @@ public class LiteMode {
     private static int value;
     private static boolean loaded;
 
+    // ════════════════════════════════════════════════════
+    // LIGHTLY: force-disable heavy features (Liquid Glass, blur, particles, etc.)
+    // All changes are isolated here for easy re-patching on update.
+    // ════════════════════════════════════════════════════
+    public static final int LIGHTLY_FORCE_DISABLED =
+        FLAG_LIQUID_GLASS | FLAG_CHAT_BLUR | FLAG_CHAT_BACKGROUND |
+        FLAG_CHAT_SPOILER | FLAG_CHAT_SCALE | FLAG_CHAT_THANOS |
+        FLAG_PARTICLES |
+        FLAG_ANIMATED_EMOJI_KEYBOARD | FLAG_ANIMATED_EMOJI_REACTIONS |
+        FLAG_ANIMATED_EMOJI_CHAT | FLAGS_ANIMATED_STICKERS |
+        FLAG_CALLS_ANIMATIONS;
+
     public static int getValue() {
         return getValue(false);
     }
@@ -114,7 +126,8 @@ public class LiteMode {
                 onPowerSaverApplied(lastPowerSaverApplied = false);
             }
         }
-        return value;
+        // LIGHTLY: strip heavy flags
+        return value & ~LIGHTLY_FORCE_DISABLED;
     }
 
     private static int lastBatteryLevelCached = -1;
@@ -169,7 +182,8 @@ public class LiteMode {
     public static void setAllFlags(int flags) {
         // in settings it is already handled. would you handle it? 🫵
         // onFlagsUpdate(value, flags);
-        value = flags;
+        // LIGHTLY: strip heavy features on save
+        value = flags & ~LIGHTLY_FORCE_DISABLED;
         savePreference();
     }
 
@@ -200,7 +214,8 @@ public class LiteMode {
     }
 
     public static void loadPreference() {
-        int defaultValue = PRESET_HIGH, batteryDefaultValue = BATTERY_HIGH;
+        // LIGHTLY: force power-saver defaults to minimise battery drain & memory
+        int defaultValue = PRESET_POWER_SAVER, batteryDefaultValue = 0;
         if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
             defaultValue = PRESET_LOW;
             batteryDefaultValue = BATTERY_LOW;
