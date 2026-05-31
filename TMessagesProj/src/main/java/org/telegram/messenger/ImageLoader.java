@@ -2064,7 +2064,8 @@ public class ImageLoader {
         } else {
             maxSize = 15;
         }
-        int cacheSize = DEBUG_MODE ? 1 : Math.min(maxSize, memoryClass / 7) * 1024 * 1024;
+        // LIGHTLY: reduce image memory cache from memoryClass/7 to memoryClass/14
+        int cacheSize = DEBUG_MODE ? 1 : Math.min(maxSize, memoryClass / 14) * 1024 * 1024;
 
         int commonCacheSize =  DEBUG_MODE ? 1 : (int) (cacheSize * 0.8f);
         int smallImagesCacheSize =   DEBUG_MODE ? 1 : (int) (cacheSize * 0.2f);

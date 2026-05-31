@@ -18,7 +18,8 @@ public class AutoDeleteMediaTask {
 
     public static void run() {
         int time = (int) (System.currentTimeMillis() / 1000);
-        if (Math.abs(time - SharedConfig.lastKeepMediaCheckTime) < 24 * 60 * 60) {
+        // LIGHTLY: check cache every 6 hours instead of 24
+        if (Math.abs(time - SharedConfig.lastKeepMediaCheckTime) < 6 * 60 * 60) {
             return;
         }
         SharedConfig.lastKeepMediaCheckTime = time;
@@ -139,65 +140,59 @@ public class AutoDeleteMediaTask {
                 }
             //}
 
-            int maxCacheGb = SharedConfig.getPreferences().getInt("cache_limit", Integer.MAX_VALUE);
-            if (maxCacheGb != Integer.MAX_VALUE) {
-                long maxCacheSize;
-                if (maxCacheGb == 1) {
-                    maxCacheSize = 1024L * 1024L * 300L;
-                } else {
-                    maxCacheSize = maxCacheGb * 1024L * 1024L * 1000L;
-                }
-                long totalSize = 0;
+            // LIGHTLY: aggressive cache limit (default 200MB, configurable via SharedConfig)
+            int maxCacheMb = SharedConfig.getPreferences().getInt("lightly_cache_limit_mb", 200);
+            long maxCacheSize = maxCacheMb * 1024L * 1024L;
+            long totalSize = 0;
+            for (int a = 0; a < paths.size(); a++) {
+                totalSize += Utilities.getDirSize(paths.valueAt(a).getAbsolutePath(), 0, true);
+            }
+            if (totalSize > maxCacheSize) {
+                ArrayList<FileInfoInternal> allFiles = new ArrayList<>();
                 for (int a = 0; a < paths.size(); a++) {
-                    totalSize += Utilities.getDirSize(paths.valueAt(a).getAbsolutePath(), 0, true);
+                    File dir = paths.valueAt(a);
+                    fillFilesRecursive(dir, allFiles);
                 }
-                if (totalSize > maxCacheSize) {
-                    ArrayList<FileInfoInternal> allFiles = new ArrayList<>();
-                    for (int a = 0; a < paths.size(); a++) {
-                        File dir = paths.valueAt(a);
-                        fillFilesRecursive(dir, allFiles);
+                for (int i = 0; i < cacheByChatsControllers.size(); i++) {
+                    cacheByChatsControllers.get(i).lookupFiles(allFiles);
+                }
+                Collections.sort(allFiles, (o1, o2) -> {
+                    if (o2.lastUsageDate > o1.lastUsageDate) {
+                        return -1;
+                    } else if (o2.lastUsageDate < o1.lastUsageDate) {
+                        return 1;
                     }
-                    for (int i = 0; i < cacheByChatsControllers.size(); i++) {
-                        cacheByChatsControllers.get(i).lookupFiles(allFiles);
+                    return 0;
+                });
+
+                for (int i = 0; i < allFiles.size(); i++) {
+                    if (allFiles.get(i).keepMedia == CacheByChatsController.KEEP_MEDIA_FOREVER) {
+                        continue;
                     }
-                    Collections.sort(allFiles, (o1, o2) -> {
-                        if (o2.lastUsageDate > o1.lastUsageDate) {
-                            return -1;
-                        } else if (o2.lastUsageDate < o1.lastUsageDate) {
-                            return 1;
-                        }
-                        return 0;
-                    });
+                    if (allFiles.get(i).lastUsageDate <= 0) {
+                        skippedFiles++;
+                        continue;
+                    }
+                    long size = allFiles.get(i).file.length();
+                    totalSize -= size;
 
-                    for (int i = 0; i < allFiles.size(); i++) {
-                        if (allFiles.get(i).keepMedia == CacheByChatsController.KEEP_MEDIA_FOREVER) {
-                            continue;
-                        }
-                        if (allFiles.get(i).lastUsageDate <= 0) {
-                            skippedFiles++;
-                            continue;
-                        }
-                        long size = allFiles.get(i).file.length();
-                        totalSize -= size;
+                    try {
+                        deletedFilesBySize++;
+                        deletedFilesBySizeSize += size;
+                        allFiles.get(i).file.delete();
+                    } catch (Exception e) {
+                    }
 
-                        try {
-                            deletedFilesBySize++;
-                            deletedFilesBySizeSize += size;
-                            allFiles.get(i).file.delete();
-                        } catch (Exception e) {
-
-                        }
-
-                        if (totalSize < maxCacheSize) {
-                            break;
-                        }
+                    if (totalSize < maxCacheSize) {
+                        break;
                     }
                 }
             }
 
             File stickersPath = new File(cacheDir, "acache");
             if (stickersPath.exists()) {
-                long currentTime = time - 60 * 60 * 24;
+                // LIGHTLY: clean sticker cache older than 1 hour (was 24h)
+                long currentTime = time - 60 * 60;
                 try {
                     Utilities.clearDir(stickersPath.getAbsolutePath(), 0, currentTime, false);
                 } catch (Throwable e) {
