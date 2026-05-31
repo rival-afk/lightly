@@ -104,6 +104,17 @@ import me.vkryl.android.animator.ReplaceAnimator;
 
 @SuppressLint("ViewConstructor")
 public class DialogStoriesCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate, FactorAnimator.Target {
+    // LIGHTLY: disabled stories
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(0, 0);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {}
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) { return false; }
 
     public final static int TYPE_DIALOGS = 0;
     public final static int TYPE_ARCHIVE= 1;

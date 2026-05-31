@@ -29,6 +29,16 @@ import org.telegram.ui.Components.RecyclerListView;
 
 public class StoriesListPlaceProvider implements StoryViewer.PlaceProvider {
 
+    // LIGHTLY: disabled stories
+    @Override
+    public View getView(int i, int i1, int i2) { return null; }
+    @Override
+    public int getId(int i, int i1, int i2) { return 0; }
+    @Override
+    public Object getParentObject(int i) { return null; }
+    @Override
+    public void cancel() {}
+
     private final RecyclerListView recyclerListView;
     private final ProfileChannelCell profileChannelCell;
     int[] clipPoint = new int[2];
