@@ -120,6 +120,9 @@ android {
                 arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-21' //, '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
             }
         }
+
+        buildConfigField "int", "APP_ID", resolveEnv("APP_ID", "4")
+        buildConfigField "String", "APP_HASH", "\"" + resolveEnv("APP_HASH", "014b35b6184100b085b0d0572f9b5103") + "\""
     }
 
     buildTypes {
@@ -225,6 +228,13 @@ android {
     namespace 'org.telegram.messenger'
 }
 
+
+def resolveEnv(String key, String defaultValue) {
+    if (rootProject.ext.has(key)) {
+        return rootProject.ext.get(key)
+    }
+    return defaultValue
+}
 
 def getProps(String propName) {
     def propsFile = rootProject.file('local.properties')

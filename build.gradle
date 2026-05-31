@@ -1,4 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+def envFile = rootProject.file('.env')
+if (envFile.exists()) {
+    def props = new Properties()
+    envFile.withInputStream { stream -> props.load(stream) }
+    props.each { key, val ->
+        project.ext.set(key, val)
+        println "Loaded env: $key"
+    }
+}
+
 buildscript {
     repositories {
         mavenCentral()
