@@ -236,6 +236,13 @@ def resolveEnv(String key, String defaultValue) {
     return defaultValue
 }
 
+def resolveEnv(String key, String defaultValue) {
+    if (rootProject.ext.has(key)) {
+        return rootProject.ext.get(key)
+    }
+    return defaultValue
+}
+
 def getProps(String propName) {
     def propsFile = rootProject.file('local.properties')
     if (propsFile.exists()) {
