@@ -1072,6 +1072,14 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
 
     private final StoryViewer.PlaceProvider provider = new StoryViewer.PlaceProvider() {
         @Override
+        public View getView(int i, int i1, int i2) { return null; }
+        @Override
+        public int getId(int i, int i1, int i2) { return 0; }
+        @Override
+        public Object getParentObject(int i) { return null; }
+        @Override
+        public void cancel() {}
+
         public boolean findView(long dialogId, int messageId, int storyId, int type, StoryViewer.TransitionViewHolder holder) {
             holder.avatarImage = null;
             holder.storyImage = null;

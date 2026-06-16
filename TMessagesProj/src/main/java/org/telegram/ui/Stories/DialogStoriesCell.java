@@ -104,18 +104,6 @@ import me.vkryl.android.animator.ReplaceAnimator;
 
 @SuppressLint("ViewConstructor")
 public class DialogStoriesCell extends FrameLayout implements NotificationCenter.NotificationCenterDelegate, FactorAnimator.Target {
-    // LIGHTLY: disabled stories
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        setMeasuredDimension(0, 0);
-    }
-
-    @Override
-    protected void dispatchDraw(Canvas canvas) {}
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) { return false; }
-
     public final static int TYPE_DIALOGS = 0;
     public final static int TYPE_ARCHIVE= 1;
     private static final float COLLAPSED_DIS = 16;
@@ -604,7 +592,7 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
             items.add(new Item(UserConfig.getInstance(currentAccount).getClientUserId()));
         }
 
-        ArrayList<TL_stories.PeerStories> allStories = type == TYPE_ARCHIVE ? storiesController.getHiddenList() : storiesController.getDialogListStories();
+        ArrayList<TL_stories.TL_peerStories> allStories = type == TYPE_ARCHIVE ? storiesController.getHiddenList() : storiesController.getDialogListStories();
         for (int i = 0; i < allStories.size(); i++) {
             long dialogId = DialogObject.getPeerDialogId(allStories.get(i).peer);
             if (dialogId != UserConfig.getInstance(currentAccount).getClientUserId()) {

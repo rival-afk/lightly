@@ -900,7 +900,7 @@ public class StoriesUtilities {
     }
 
     public static void setImage(ImageReceiver imageReceiver, StoriesController.UploadingStory uploadingStory) {
-        if (uploadingStory.entry.isVideo) {
+        if (uploadingStory.isVideo) {
             imageReceiver.setImage(ImageLocation.getForPath(uploadingStory.firstFramePath), "320_180", null, null, null, 0, null, null, 0);
         } else {
             imageReceiver.setImage(ImageLocation.getForPath(uploadingStory.path), "320_180", null, null, null, 0, null, null, 0);
